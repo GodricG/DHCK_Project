@@ -95,7 +95,7 @@ namespace Server_V1
             splitContainer3.SplitterDistance = splitContainer2.Panel1.Height / 2;
             treeViewMain.ExpandAll();
             MonitorMain.ArgsEvent = MessageToListBox;
-            SqlServerDatabase sqlconn = new SqlServerDatabase();
+            DHCKSQLServerDatabase.SqlServerDatabase sqlconn = new DHCKSQLServerDatabase.SqlServerDatabase();
             sqlconn.SetToDefaultDatabase();
             Thread OpenDbThread = new Thread(sqlconn.OpenDatabase);
             //OpenDbThread.Start();

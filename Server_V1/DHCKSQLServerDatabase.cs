@@ -3,12 +3,14 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Windows.Forms;
+using Server_V1.DHCK_ServerDataSet2TableAdapters;
 
 namespace Server_V1
 {
     public partial class DHCKSQLServerDatabase : Form
     {
         public static int comboBoxIndex;
+        public static DataSet SearchDstable = new DataSet();
         public DHCKSQLServerDatabase()
         {
             InitializeComponent();
@@ -18,7 +20,7 @@ namespace Server_V1
         private void DHCKSQLServerDatabase_Load(object sender, EventArgs e)
         {
             // TODO: 这行代码将数据加载到表“dHCK_ServerForSearch.报警状态记录表”中。您可以根据需要移动或删除它。
-            this.报警状态记录表TableAdapter.Fill(this.dHCK_ServerForSearch.报警状态记录表);
+            //this.报警状态记录表TableAdapter.Fill(this.dHCK_ServerForSearch.报警状态记录表);
             // TODO: 这行代码将数据加载到表“dHCK_ServerDataSet2.报警状态记录表”中。您可以根据需要移动或删除它。
             this.TableAdapter.Fill(this.dHCK_ServerDataSet2.报警状态记录表);
 
@@ -48,11 +50,20 @@ namespace Server_V1
             SqlServerDatabase sqlServer = new SqlServerDatabase();
             try
             {
-                if (sqlServer.CommitButton(tmp))
+                int tmp1 = sqlServer.CommitButton(tmp);
+                if (tmp1==0)
                 {
-                    MessageBox.Show("Insertation succeeded.");
                     TableAdapter.Fill(this.dHCK_ServerDataSet2.报警状态记录表);
                     dataGridView.Refresh();
+                }
+                else if (tmp1 == 1)
+                {
+                    dataGridView1.DataSource = SearchDstable;
+                    dataGridView1.DataMember = "testTable";
+                }
+                else
+                {
+                    
                 }
             }
             catch (Exception exception)
@@ -60,6 +71,7 @@ namespace Server_V1
                 Console.WriteLine(exception);
                 throw;
             }
+            
 
         }
 
@@ -82,142 +94,149 @@ namespace Server_V1
         {
             comboBoxIndex = comboBox1.SelectedIndex;
         }
-    }
-    public class SqlServerDatabase : IConnectToDb<AlarmInfo>
-    {
-        private static String DatabaseName = "DHCK_Server";
-        private string connectionString_preload = "server=GODRICSLAPTOP\\SQLEXPRESS;database="+ DatabaseName + ";uid=sa;pwd=gxq654321";
-        //private string connectionString_preload = "server=DHCKSERVER\\DHCK_EXPRESS;database=" + DatabaseName + ";uid=sa;pwd=gxq654321";
-
-        private static string _connectionString = "server=GODRICSLAPTOP\\SQLEXPRESS;database="+ DatabaseName + ";uid=sa;pwd=gxq654321";
-        private SqlConnection SqlConn = new SqlConnection(_connectionString);
-
-        private class SqlServerDbConn
+        public class SqlServerDatabase : IConnectToDb<AlarmInfo>
         {
-            //public SqlConnection sqlConnection;
-            //public SqlCommand sqlCommand;
-            public SqlConnection sqlConnection;
-            public SqlCommand sqlCommand;
+            private static String DatabaseName = "DHCK_Server";
+            private string connectionString_preload = "server=GODRICSLAPTOP\\SQLEXPRESS;database=" + DatabaseName + ";uid=sa;pwd=gxq654321";
+            //private string connectionString_preload = "server=DHCKSERVER\\DHCK_EXPRESS;database=" + DatabaseName + ";uid=sa;pwd=gxq654321";
 
-            public SqlServerDbConn()
+            private static string _connectionString = "server=GODRICSLAPTOP\\SQLEXPRESS;database=" + DatabaseName + ";uid=sa;pwd=gxq654321";
+            private SqlConnection SqlConn = new SqlConnection(_connectionString);
+
+            private class SqlServerDbConn
             {
-                
-            }
-            public SqlServerDbConn(SqlConnection theConnection, SqlCommand theCommand)
-            {
-                sqlConnection = theConnection;
-                sqlCommand = theCommand;
-            }
+                //public SqlConnection sqlConnection;
+                //public SqlCommand sqlCommand;
+                public SqlConnection sqlConnection;
+                public SqlCommand sqlCommand;
 
-        }
-
-        private SqlServerDbConn GetConnInfo(string sqlCommand)
-        {
-            SqlServerDbConn tmp = new SqlServerDbConn();
-            tmp.sqlConnection = SqlConn;
-            tmp.sqlCommand = new SqlCommand(sqlCommand,tmp.sqlConnection);
-            return tmp;
-        }
-        public SqlServerDatabase()
-        {
-
-        }
-        public SqlServerDatabase(string connectionString)
-        {
-            _connectionString = connectionString;
-        }
-
-        public void SetToDefaultDatabase()
-        {
-            _connectionString = connectionString_preload;
-        }
-        public void OpenDatabase()
-        {
-            try
-            {
-                 SqlConn = new SqlConnection(_connectionString);
-                
-                SqlConn.Open();
-                
-                MessageBox.Show(@"Connected to SqlServer.", @"Success");
-                return;
-                
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(@"Cannot connect to SqlServer" + e.ToString(), @"Error");
-                return;
-            }
-        }
-        public void ConnectToDatabase()
-        {
-            try
-            {
-                using (SqlConnection SqlConn = new SqlConnection(_connectionString))
+                public SqlServerDbConn()
                 {
+
+                }
+                public SqlServerDbConn(SqlConnection theConnection, SqlCommand theCommand)
+                {
+                    sqlConnection = theConnection;
+                    sqlCommand = theCommand;
+                }
+
+            }
+
+            private SqlServerDbConn GetConnInfo(string sqlCommand)
+            {
+                SqlServerDbConn tmp = new SqlServerDbConn();
+                tmp.sqlConnection = SqlConn;
+                tmp.sqlCommand = new SqlCommand(sqlCommand, tmp.sqlConnection);
+                return tmp;
+            }
+            public SqlServerDatabase()
+            {
+
+            }
+            public SqlServerDatabase(string connectionString)
+            {
+                _connectionString = connectionString;
+            }
+
+            public void SetToDefaultDatabase()
+            {
+                _connectionString = connectionString_preload;
+            }
+            public void OpenDatabase()
+            {
+                try
+                {
+                    SqlConn = new SqlConnection(_connectionString);
+
                     SqlConn.Open();
+
                     MessageBox.Show(@"Connected to SqlServer.", @"Success");
+                    return;
+
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(@"Cannot connect to SqlServer" + e.ToString(), @"Error");
                     return;
                 }
             }
-            catch (Exception e)
+            public void ConnectToDatabase()
             {
-                MessageBox.Show(@"Cannot connect to SqlServer" + e.ToString(), @"Error");
-                return;
+                try
+                {
+                    using (SqlConnection SqlConn = new SqlConnection(_connectionString))
+                    {
+                        SqlConn.Open();
+                        MessageBox.Show(@"Connected to SqlServer.", @"Success");
+                        return;
+                    }
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(@"Cannot connect to SqlServer" + e.ToString(), @"Error");
+                    return;
+                }
+            }
+
+            public int CommitButton(AlarmInfo classValue)
+            {
+                if (DHCKSQLServerDatabase.comboBoxIndex == 0)
+                {
+                    string sqlStr = "INSERT INTO 报警状态记录表 VALUES(@报警级别,@报警时间,@报警地点,@报警类型,@处理状态,@处理人,@处理时间,@处理说明)";
+                    //string sqlStr = "INSERT INTO 报警状态记录表 VALUES(@报警级别,@报警地点,@报警类型,@处理状态,@处理人,@处理说明)";
+                    //SqlConn = new SqlConnection(connectionString_preload);
+                    //SqlCommand sqlCommand = new SqlCommand(sqlStr,SqlConn);
+                    SqlServerDbConn sqlServerConnInfo = new SqlServerDbConn(SqlConn, GetConnInfo(sqlStr).sqlCommand);
+                    SqlCommand sqlCommand = sqlServerConnInfo.sqlCommand;
+                    sqlCommand.Parameters.Add("@报警级别", SqlDbType.Char, 8).Value = classValue.AlarmLevel;
+                    sqlCommand.Parameters.Add("@报警时间", SqlDbType.DateTime, 8).Value = classValue.AlarmDate;
+                    sqlCommand.Parameters.Add("@报警地点", SqlDbType.Char, 8).Value = classValue.AlarmLocation;
+                    sqlCommand.Parameters.Add("@报警类型", SqlDbType.Char, 8).Value = classValue.AlarmType;
+                    sqlCommand.Parameters.Add("@处理状态", SqlDbType.Char, 8).Value = classValue.ProcessState;
+                    sqlCommand.Parameters.Add("@处理人", SqlDbType.Char, 8).Value = classValue.Staff;
+                    sqlCommand.Parameters.Add("@处理时间", SqlDbType.DateTime, 8).Value = classValue.ProcessDate;
+                    sqlCommand.Parameters.Add("@处理说明", SqlDbType.Char, 8).Value = classValue.ProcessInfo;
+                    SqlConn.Open();
+                    sqlCommand.ExecuteNonQuery();
+                    SqlConn.Close();
+                    return 0;
+                }
+                else if (DHCKSQLServerDatabase.comboBoxIndex == 1)
+                {
+                    string sqlStr = "SELECT * FROM 报警状态记录表 WHERE 报警地点='" + classValue.AlarmLocation + "'";
+                    SqlConn.Open();
+                    SqlCommand sc = new SqlCommand(sqlStr, SqlConn);
+                    SqlDataAdapter adapter = new SqlDataAdapter(sc);
+                    DataSet dstable = new DataSet();
+                    adapter.Fill(dstable, "testTable");
+                    SearchDstable = dstable;
+                    SqlConn.Close();
+                    SqlConn.Dispose();
+                    return 1;
+                }
+                else
+                {
+                    MessageBox.Show("Index = 2");
+                    return 2;
+                }
             }
         }
-        
-        public bool CommitButton(AlarmInfo classValue)
+
+        public class AlarmInfo
         {
-            if (DHCKSQLServerDatabase.comboBoxIndex==0)
-            {
-                AlarmInfo tmp = classValue;
-                string sqlStr = "INSERT INTO 报警状态记录表 VALUES(@报警级别,@报警时间,@报警地点,@报警类型,@处理状态,@处理人,@处理时间,@处理说明)";
-                //string sqlStr = "INSERT INTO 报警状态记录表 VALUES(@报警级别,@报警地点,@报警类型,@处理状态,@处理人,@处理说明)";
-                //SqlConn = new SqlConnection(connectionString_preload);
-                //SqlCommand sqlCommand = new SqlCommand(sqlStr,SqlConn);
-                SqlServerDbConn sqlServerConnInfo = new SqlServerDbConn(SqlConn, GetConnInfo(sqlStr).sqlCommand);
-                SqlCommand sqlCommand = sqlServerConnInfo.sqlCommand;
-                sqlCommand.Parameters.Add("@报警级别", SqlDbType.Char, 8).Value = classValue.AlarmLevel;
-                sqlCommand.Parameters.Add("@报警时间", SqlDbType.DateTime, 8).Value = classValue.AlarmDate;
-                sqlCommand.Parameters.Add("@报警地点", SqlDbType.Char, 8).Value = classValue.AlarmLocation;
-                sqlCommand.Parameters.Add("@报警类型", SqlDbType.Char, 8).Value = classValue.AlarmType;
-                sqlCommand.Parameters.Add("@处理状态", SqlDbType.Char, 8).Value = classValue.ProcessState;
-                sqlCommand.Parameters.Add("@处理人", SqlDbType.Char, 8).Value = classValue.Staff;
-                sqlCommand.Parameters.Add("@处理时间", SqlDbType.DateTime, 8).Value = classValue.ProcessDate;
-                sqlCommand.Parameters.Add("@处理说明", SqlDbType.Char, 8).Value = classValue.ProcessInfo;
-                SqlConn.Open();
-                sqlCommand.ExecuteNonQuery();
-                SqlConn.Close();
-                return true;
-            }
-
-            else if (DHCKSQLServerDatabase.comboBoxIndex == 1)
-            {
-                MessageBox.Show("Index = 1");
-                return true;
-            }
-            else 
-            {
-                MessageBox.Show("Index = 2");
-                return true;
-            }
+            public string AlarmLevel { get; set; }
+            public DateTime AlarmDate { get; set; }
+            public String AlarmLocation { get; set; }
+            public String AlarmType { get; set; }
+            public string ProcessState { get; set; }
+            public string Staff { get; set; }
+            public DateTime ProcessDate { get; set; }
+            public String ProcessInfo { get; set; }
+        }
+        public interface IConnectToDb<T> where T : class
+        {
+            int CommitButton(T classValue);
         }
     }
-
-    public class AlarmInfo
-    {
-        public string AlarmLevel { get; set; }
-        public DateTime AlarmDate { get; set; }
-        public String AlarmLocation { get; set; }
-        public String AlarmType { get; set; }
-        public string ProcessState { get; set; }
-        public string Staff { get; set; }
-        public DateTime ProcessDate { get; set; }
-        public String ProcessInfo { get; set; }
-    }
-    public interface IConnectToDb<T> where T : class
-    {
-        bool CommitButton(T classValue);    
-    }
+    
 }
