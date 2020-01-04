@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
@@ -63,7 +64,8 @@ namespace Server_V1
                 }
                 else
                 {
-                    
+                    dataGridView1.DataSource = SearchDstable;
+                    dataGridView1.DataMember = "testTable";
                 }
             }
             catch (Exception exception)
@@ -203,7 +205,78 @@ namespace Server_V1
                 }
                 else if (DHCKSQLServerDatabase.comboBoxIndex == 1)
                 {
-                    string sqlStr = "SELECT * FROM 报警状态记录表 WHERE 报警地点='" + classValue.AlarmLocation + "'";
+                    //string sqlStr = "SELECT * FROM 报警状态记录表 WHERE 报警地点 LIKE '%" + classValue.AlarmLocation + "%'";
+                    string sqlStr = "SELECT * FROM 报警状态记录表 ";
+                    if (classValue.AlarmLevel!="")
+                    {
+                        sqlStr += "WHERE 报警级别 LIKE '%" + classValue.AlarmLevel + "%'";
+                    }
+
+                    //if (classValue.AlarmDate.ToString() != "")
+                    //{
+                    //    sqlStr += "AND 报警时间 LIKE '%" + classValue.AlarmDate.ToString() + "%' ";
+                    //}
+                    if (classValue.AlarmLocation!="")
+                    {
+                        if (sqlStr[sqlStr.Length-1]==' ')
+                        {
+                            sqlStr += "WHERE ";
+                        }
+                        else
+                        {
+                            sqlStr += "AND ";
+                        }
+                        sqlStr += " 报警地点 LIKE '%" + classValue.AlarmLocation + "%'";
+                    }
+
+                    if (classValue.AlarmType!="")
+                    {
+                        if (sqlStr[sqlStr.Length - 1] == ' ')
+                        {
+                            sqlStr += "WHERE ";
+                        }
+                        else
+                        {
+                            sqlStr += "AND ";
+                        }
+                        sqlStr += " 报警类型 LIKE '%" + classValue.AlarmType + "%'";
+                    }
+                    if (classValue.ProcessState != "")
+                    {
+                        if (sqlStr[sqlStr.Length - 1] == ' ')
+                        {
+                            sqlStr += "WHERE ";
+                        }
+                        else
+                        {
+                            sqlStr += "AND ";
+                        }
+                        sqlStr += " 处理状态 LIKE '%" + classValue.ProcessState + "%'";
+                    }
+                    if (classValue.Staff != "")
+                    {
+                        if (sqlStr[sqlStr.Length - 1] == ' ')
+                        {
+                            sqlStr += "WHERE ";
+                        }
+                        else
+                        {
+                            sqlStr += "AND ";
+                        }
+                        sqlStr += " 处理人 LIKE '%" + classValue.Staff + "%'";
+                    }
+                    if (classValue.ProcessInfo != "")
+                    {
+                        if (sqlStr[sqlStr.Length - 1] == ' ')
+                        {
+                            sqlStr += "WHERE ";
+                        }
+                        else
+                        {
+                            sqlStr += "AND ";
+                        }
+                        sqlStr += " 处理说明 LIKE '%" + classValue.ProcessInfo + "%'";
+                    }
                     SqlConn.Open();
                     SqlCommand sc = new SqlCommand(sqlStr, SqlConn);
                     SqlDataAdapter adapter = new SqlDataAdapter(sc);
@@ -216,7 +289,85 @@ namespace Server_V1
                 }
                 else
                 {
-                    MessageBox.Show("Index = 2");
+                    string sqlStr = "SELECT * FROM 报警状态记录表 ";
+                    if (classValue.AlarmLevel != "")
+                    {
+                        sqlStr += "WHERE 报警级别 LIKE '%" + classValue.AlarmLevel + "%'";
+                    }
+
+                    //if (classValue.AlarmDate.ToString() != "")
+                    //{
+                    //    sqlStr += "AND 报警时间 LIKE '%" + classValue.AlarmDate.ToString() + "%' ";
+                    //}
+                    if (classValue.AlarmLocation != "")
+                    {
+                        if (sqlStr[sqlStr.Length - 1] == ' ')
+                        {
+                            sqlStr += "WHERE ";
+                        }
+                        else
+                        {
+                            sqlStr += "OR ";
+                        }
+                        sqlStr += " 报警地点 LIKE '%" + classValue.AlarmLocation + "%'";
+                    }
+
+                    if (classValue.AlarmType != "")
+                    {
+                        if (sqlStr[sqlStr.Length - 1] == ' ')
+                        {
+                            sqlStr += "WHERE ";
+                        }
+                        else
+                        {
+                            sqlStr += "OR ";
+                        }
+                        sqlStr += " 报警类型 LIKE '%" + classValue.AlarmType + "%'";
+                    }
+                    if (classValue.ProcessState != "")
+                    {
+                        if (sqlStr[sqlStr.Length - 1] == ' ')
+                        {
+                            sqlStr += "WHERE ";
+                        }
+                        else
+                        {
+                            sqlStr += "OR ";
+                        }
+                        sqlStr += " 处理状态 LIKE '%" + classValue.ProcessState + "%'";
+                    }
+                    if (classValue.Staff != "")
+                    {
+                        if (sqlStr[sqlStr.Length - 1] == ' ')
+                        {
+                            sqlStr += "WHERE ";
+                        }
+                        else
+                        {
+                            sqlStr += "OR ";
+                        }
+                        sqlStr += " 处理人 LIKE '%" + classValue.Staff + "%'";
+                    }
+                    if (classValue.ProcessInfo != "")
+                    {
+                        if (sqlStr[sqlStr.Length - 1] == ' ')
+                        {
+                            sqlStr += "WHERE ";
+                        }
+                        else
+                        {
+                            sqlStr += "OR ";
+                        }
+                        sqlStr += " 处理说明 LIKE '%" + classValue.ProcessInfo + "%'";
+                    }
+                    SqlConn.Open();
+                    SqlCommand sc = new SqlCommand(sqlStr, SqlConn);
+                    SqlDataAdapter adapter = new SqlDataAdapter(sc);
+                    DataSet dstable = new DataSet();
+                    adapter.Fill(dstable, "testTable");
+                    SearchDstable = dstable;
+                    SqlConn.Close();
+                    SqlConn.Dispose();
                     return 2;
                 }
             }

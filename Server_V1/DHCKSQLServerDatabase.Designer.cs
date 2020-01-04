@@ -176,6 +176,7 @@
             this.dataGridView.DataSource = this.报警状态记录表BindingSource;
             this.dataGridView.Location = new System.Drawing.Point(3, 3);
             this.dataGridView.Name = "dataGridView";
+            this.dataGridView.ReadOnly = true;
             this.dataGridView.RowTemplate.Height = 27;
             this.dataGridView.Size = new System.Drawing.Size(1848, 328);
             this.dataGridView.TabIndex = 0;
@@ -263,8 +264,9 @@
             this.dataGridView1.DataSource = this.报警状态记录表BindingSource1;
             this.dataGridView1.Location = new System.Drawing.Point(3, 121);
             this.dataGridView1.Name = "dataGridView1";
+            this.dataGridView1.ReadOnly = true;
             this.dataGridView1.RowTemplate.Height = 27;
-            this.dataGridView1.Size = new System.Drawing.Size(1848, 150);
+            this.dataGridView1.Size = new System.Drawing.Size(1848, 423);
             this.dataGridView1.TabIndex = 7;
             // 
             // 报警编号DataGridViewTextBoxColumn1
